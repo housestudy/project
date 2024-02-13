@@ -4,11 +4,13 @@ package house.houseproject.service;
 
 import house.houseproject.Repository.RegisteredHouseRepository;
 import house.houseproject.domain.RegisteredHouse;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +35,7 @@ public class RecommendService {
         return list;
     }
 
-    public List<RegisteredHouse> findUserAddress(String userAddress) {
+    public Page<RegisteredHouse> findUserAddress(String userAddress, Pageable pageable) {
 
         String extracted = ""; //
 
@@ -53,7 +55,7 @@ public class RecommendService {
        log.info("추출된 구 이름 : {} ", extracted);
 
 
-        return registeredHouseRepository.findBySggNm(extracted);
+        return registeredHouseRepository.findBySggNm(extracted, pageable);
 
     }
 
