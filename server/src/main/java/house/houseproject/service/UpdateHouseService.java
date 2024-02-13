@@ -1,13 +1,19 @@
 package house.houseproject.service;
 
 import house.houseproject.Repository.HUserRepository;
+import house.houseproject.Repository.LikedRepository;
 import house.houseproject.Repository.RegisteredHouseRepository;
+import house.houseproject.domain.HUser;
+import house.houseproject.domain.Liked;
 import house.houseproject.domain.RegisteredHouse;
+import house.houseproject.dto.LikedDto;
 import house.houseproject.dto.UpdateHouseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 @Slf4j
@@ -15,11 +21,12 @@ import java.util.Optional;
 public class UpdateHouseService {
 
     private final RegisteredHouseRepository registeredHouseRepository;
+    private final LikedRepository likedRepository;
 
-
-    public UpdateHouseService(RegisteredHouseRepository registeredHouseRepository) {
+    public UpdateHouseService(RegisteredHouseRepository registeredHouseRepository, LikedRepository likedRepository) {
         this.registeredHouseRepository = registeredHouseRepository;
 
+        this.likedRepository = likedRepository;
     }
         @Transactional
         public UpdateHouseDto updateHouse(UpdateHouseDto updateHouseDto) throws Exception {
@@ -80,6 +87,32 @@ private UpdateHouseDto updateHouseDto(RegisteredHouse registeredHouse) {
     return updateHouseDto;
 }
 
+
+    @Transactional
+    public boolean deleteHouse(int userId, int houseId) {
+        try {
+
+
+            RegisteredHouse registeredHouse = registeredHouseRepository.findById(houseId)
+                    .orElseThrow(ChangeSetPersister.NotFoundException::new);
+
+            List<Liked> likedList = likedRepository.findAllByUserIdAndRegisteredId(userId, houseId);
+
+            if(likedList != null) {
+                likedRepository.deleteAll(likedList);
+            }
+
+            registeredHouseRepository.delete(registeredHouse);
+
+            return true;
+        } catch (Exception e) {
+            // 예외 처리 및 로깅
+            return false;
+        }
+
+
+
+    }
 
 
 
